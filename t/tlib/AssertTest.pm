@@ -70,8 +70,8 @@ sub test_assert {
 
         'bang'  => [ __LINE__, sub { shift->assert(0, 'bang')              } ],
         'bang'  => [ __LINE__, sub { shift->assert('', 'bang')             } ],
-        "'qux' did not match /(?-xism:foo)/"
-                => [ __LINE__, sub { shift->assert(qr/foo/, 'qux')         } ],
+        qr|'qux' did not match /.*/|,
+                   [ __LINE__, sub { shift->assert(qr/foo/, 'qux')         } ],
         'bang'  => [ __LINE__, sub { shift->assert(qr/foo/, 'qux', 'bang') } ],
         'a ne b'=> [ __LINE__, sub { shift->assert($coderef, 'a', 'b')     } ],
     );
@@ -101,7 +101,7 @@ sub test_assert_str_equals {
           [ __LINE__, sub { shift->assert_str_equals(undef, 'foo') } ],
         "expected '', got undef" =>
           [ __LINE__, sub { shift->assert_str_equals('', undef)    } ],
-        "expected 'foo', got undef" => 
+        "expected 'foo', got undef" =>
           [ __LINE__, sub { shift->assert_str_equals('foo', undef) } ],
         "expected '', got '0'" =>
           [ __LINE__, sub { shift->assert_str_equals('', 0)        } ],
@@ -117,7 +117,7 @@ sub test_assert_str_equals {
           [ __LINE__, sub { shift->assert_str_equals('-0', 0)      } ],
         "expected 'foo', got 'bar'" =>
           [ __LINE__, sub { shift->assert_str_equals('foo', 'bar') } ],
-        
+
     );
 }
 
@@ -156,7 +156,7 @@ sub test_assert_matches {
             => [ __LINE__, sub { shift->assert_matches(1, 2) } ]
     );
 }
-    
+
 sub test_assert_does_not_match {
     my $self = shift;
     $self->assert_does_not_match(qr/ob/, 'fooBar');
@@ -165,7 +165,7 @@ sub test_assert_does_not_match {
             => [ __LINE__, sub { shift->assert_does_not_match(1, 2) } ]
     );
 }
-    
+
 sub test_assert_equals_null {
     my $self = shift;
     $self->assert_equals(undef, undef);
@@ -208,7 +208,7 @@ sub test_assert_raises {
               sub { shift->assert_raises('AssertTest::Exception', sub {}, 'zxc') }
              ],
     );
-}    
+}
 
 sub test_ok_boolean {
     my $self = shift;
@@ -232,7 +232,7 @@ sub test_ok_bad_args {
 
 sub test_ok_equals {
     my $self = shift;
-    foreach my $args ([0, 0], [2, 2], [1.34, 1.34], 
+    foreach my $args ([0, 0], [2, 2], [1.34, 1.34],
 		      ['foo', 'foo'], ['', ''], [undef, undef],
 		      [sub {2+2}, 4], ['fixed', qr/x/]) {
 	$self->ok(@$args);
@@ -245,15 +245,15 @@ sub test_ok_not_equals {
     my $adder = sub { 2+2 };
     my @checks = (
         # interface is ok(GOT, EXPECTED);
-        q{expected 1, got 0}                => [ 0,      1       ], 
-        q{expected 0, got 1}                => [ 1,      0       ], 
-        q{expected 3, got 2}                => [ 2,      3       ], 
-        q{expected -57.001, got -57}        => [ -57,    -57.001 ], 
-        q{expected 'bar', got 'foo'}        => [ 'foo',  'bar'   ], 
-        q{expected '', got 'foo'}           => [ 'foo',  ''      ], 
-        q{expected 'foo', got ''}           => [ '',     'foo'   ], 
-        q{expected 5, got 4}                => [ $adder, 5       ], 
-        q{'foo' did not match /(?-xism:x)/} => [ 'foo',  qr/x/   ], 
+        q{expected 1, got 0}                => [ 0,      1       ],
+        q{expected 0, got 1}                => [ 1,      0       ],
+        q{expected 3, got 2}                => [ 2,      3       ],
+        q{expected -57.001, got -57}        => [ -57,    -57.001 ],
+        q{expected 'bar', got 'foo'}        => [ 'foo',  'bar'   ],
+        q{expected '', got 'foo'}           => [ 'foo',  ''      ],
+        q{expected 'foo', got ''}           => [ '',     'foo'   ],
+        q{expected 5, got 4}                => [ $adder, 5       ],
+        qr|'foo' did not match /.*/|        => [ 'foo',  qr/x/   ],
     );
     my @tests = ();
     while (@checks) {
@@ -299,8 +299,8 @@ sub test_success_assert_not_equals {
     $self->assert_not_equals('string', 1);
     $self->assert_not_equals(1, 'string');
     $self->assert_not_equals('string', 0);
-    # $self->assert_not_equals(0,'string'); # Numeric comparison done here.. 
-    # $self->assert_not_equals(0, '');      # Numeric comparison done here.. 
+    # $self->assert_not_equals(0,'string'); # Numeric comparison done here..
+    # $self->assert_not_equals(0, '');      # Numeric comparison done here..
     $self->assert_not_equals('', 0);
     $self->assert_not_equals(undef, 0);
     $self->assert_not_equals(0, undef);
@@ -410,24 +410,28 @@ sub test_assert_deep_equals {
 
     my %families; # key=test-purpose, value=assorted circular structures
     foreach my $key (qw(orig copy bad_copy)) {
-	my %family = ( john => { name => 'John Doe',
-				 spouse => undef,
-				 children => [],
-			       },
-		       jane => { name   => 'Jane Doe',
-				 spouse => undef,
-				 children => [],
-			       },
-		       baby => { name => 'Baby Doll',
-#				 spouse => undef,
-				 children => [],
-			       },
-		     );
-	$family{john}{spouse} = $family{jane};
-	$family{jane}{spouse} = $family{john};
-	push @{$family{john}{children}}, $family{baby};
-	push @{$family{jane}{children}}, $family{baby};
-	$families{$key} = \%family;
+        my %family = (
+            john => {
+                name => 'John Doe',
+                spouse => undef,
+                children => [],
+            },
+            jane => {
+                name   => 'Jane Doe',
+                spouse => undef,
+                children => [],
+            },
+            baby => {
+                name => 'Baby Doll',
+                # spouse => undef,
+                children => [],
+            },
+        );
+        $family{john}{spouse} = $family{jane};
+        $family{jane}{spouse} = $family{john};
+        push @{$family{john}{children}}, $family{baby};
+        push @{$family{jane}{children}}, $family{baby};
+        $families{$key} = \%family;
     }
     $families{bad_copy}->{jane}{spouse} = $families{bad_copy}->{baby}; # was ->{john}
 
@@ -479,7 +483,11 @@ sub test_assert_deep_equals {
                  },
              }
          ],
-	 $differ->( 'HASH', 'not exist') => [$families{orig}, $families{bad_copy}], # test may be fragile due to recursion ordering?
+         # Can't do specific strings comparison, they may differ depending on keys order in hash
+         #
+	 $differ->('','') => [$families{orig}, $families{bad_copy}],
+	 ### $differ->( 'HASH', 'not exist') => [$families{orig}, $families{bad_copy}], # test may be fragile due to recursion ordering?
+         #
 	 $differ->("'3'", "'5'") => [ [ \$H, 3 ], [ \$H2, 5 ] ],
 	 $differ->("'hello'", "'goodbye'") => [ { world => \$H }, { world => \$G } ],
 	 $differ->("'hello'", "'goodbye'") => [ [ \$H, "world" ], [ \$G, "world" ] ],
@@ -528,7 +536,7 @@ my %test_hash = (
             { args => ['foo', undef], name => "'foo' ne undef" },
             { args => [undef, 'foo'], name => "undef ne 'foo'" },
             # { args => [0, ''],        name => "0 ne ''"        }, # numeric compare
-            
+
         ],
     },
 );
@@ -560,7 +568,7 @@ sub make_tests_from_matrix {
                      $self->$method_name(@{$spec->{args}});
                  }, $spec->{name});
         }
-        
+
         foreach my $outcome (grep {$_ ne 'success'} keys %{$matrix->{$method_name}}) {
             foreach my $spec (@{$matrix->{$method_name}{$outcome}}) {
                 push @tests, $self->make_test_from_coderef
