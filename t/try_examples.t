@@ -100,7 +100,7 @@ foreach my $e (@examples) {
 	    # indent lines with '# ' so they're comments if the test fails
 	    s/\n/\n# /g;
 	    # hide things that look like CPU usage
-	    s{Time:\s+[\d\.]+\s+wallclock secs \([\d\s\.]+usr\s+\+[\d\s\.]+sys\s+=[\d\s\.]+CPU\)}
+	    s{Time:\s+[\d\.-]+\s*wallclock secs \([\d\s\.-]+usr\s*\+\s*[\d\s\.-]+sys\s*=[\d\s\.-]+CPU\)}
 	    {TIME-SUMMARY}g;
 	}
 	ok($out, $guru_checked{$e});
