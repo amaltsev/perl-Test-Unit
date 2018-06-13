@@ -55,8 +55,12 @@ sub run {
 sub run_bare {
     my $self = shift;
     debug("  ", ref($self), "::run_bare() called on ", $self->name, "\n");
-    $self->set_up();
+
     # Make sure tear_down happens if and only if set_up() succeeds.
+    $self->set_up();
+
+    return unless $self->check_reqs($self->name);
+
     try {
         $self->run_test();
         1;
@@ -81,6 +85,8 @@ sub run_test {
 sub set_up    { 1 }
 
 sub tear_down { 1 }
+
+sub check_reqs { 1 }
 
 sub to_string {
     my $self = shift;
@@ -309,6 +315,11 @@ Returns the list of methods in this class matching REGEXP.
 
 If you don't have any setup or tear down code that needs to be run, we
 provide a couple of null methods. Override them if you need to.
+
+=item check_reqs
+
+Override and return false if the test fails pre-requisites and cannot be
+ran. The test will be skipped.
 
 =item annotate (MESSAGE)
 
