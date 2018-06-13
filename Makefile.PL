@@ -6,12 +6,13 @@ use ExtUtils::MakeMaker;
 require 5.010;
 
 WriteMakefile(
-    'NAME'         => 'Test::Unit',
-    'VERSION_FROM' => 'lib/Test/Unit.pm', # finds $VERSION
-    'PREREQ_PM'    => {
-                       Class::Inner   => 0,
-                       Devel::Symdump => 0,
-                       Error          => 0,
-                       base           => 1,
-                      },
+    'NAME'          => 'Test::Unit',
+    'VERSION_FROM'  => 'lib/Test/Unit.pm', # finds $VERSION
+    'PREREQ_PM'     => {
+        'Test'          => 0,
+        'Class::Inner'  => 0,
+        'Devel::Symdump'=> 0,
+        'Error'         => 0,
+        'base'          => 1,
+    },
 );
