@@ -59,7 +59,10 @@ sub run_bare {
     # Make sure tear_down happens if and only if set_up() succeeds.
     $self->set_up();
 
-    return unless $self->check_reqs($self->name);
+    if(! $self->check_reqs($self->name)) {
+        $self->tear_down();
+        return 1;
+    }
 
     try {
         $self->run_test();
